@@ -322,7 +322,8 @@ export default function QueuePage() {
                     </td>
 
                     <td colSpan={6}>
-                      <QueueNumberColumn orderId="..." />
+                      <QueueNumberColumn order_id={tx.order_id} />
+                     
                     </td>
 
                   </tr>

@@ -109,7 +109,7 @@ export default function TransactionDetailsPage() {
 
     useEffect(() => {
         if (showSuccess) {
-            const timer = setTimeout(() => setShowSuccess(false), 2500); // Hide after 2.5s
+            const timer = setTimeout(() => setShowSuccess(false), 2500); 
             return () => clearTimeout(timer);
         }
     }, [showSuccess]);
@@ -130,9 +130,9 @@ export default function TransactionDetailsPage() {
 
 
     const updateTransactionStatus = async (field: Status) => {
-        // Show modal to ask for a note before updating status
+       
         setSelectedStatusField(field);
-        setShowNoteModal(true); // Show modal when any status button is clicked
+        setShowNoteModal(true); 
     };
 
     const handleModalSubmit = async () => {
