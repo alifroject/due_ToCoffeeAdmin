@@ -136,7 +136,7 @@ export default function QueuePage() {
         {/* Filter Section */}
         <div className="bg-blue-50 bg-white border border-blue-200 p-4 rounded-lg shadow-inner mb-6">
           <h1 className="text-3xl font-bold mb-6 text-gray-800 px-4 py-2 rounded shadow-inner text-center">
-            🧾 Order Queue, ubah queue number berdasarkan dari sattus ready_for pickup menjadi true, maka ambil langkah otomatis supaya buat query number(AA_DATEMONTHYEAR), DAN STATUS QUERY NUMBER MENJADI, waiting, dan exxpired jika dibawah 30 menit, dan otomotis botton jika sudah di pickup 
+            🧾 Order Queue 
           </h1>
 
           <div className="flex flex-wrap justify-between items-start gap-4 font-[Inter]">
