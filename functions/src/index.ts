@@ -3,15 +3,11 @@ import * as functions from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
-
 admin.initializeApp();
-
-
 
 const db = admin.firestore();
 const MAX_WAIT_TIME = 30; // in minutes
 const NOTIFY_INTERVAL = 5; // in minutes
-
 
 export const setAdmin = functions.https.onCall(async (request) => {
   if (!request.auth) {
@@ -44,9 +40,7 @@ export const setAdmin = functions.https.onCall(async (request) => {
   }
 });
 
-
-
-// Helper to send notification to user
+// 🔔 Send notification every 5 minutes before expiration
 async function sendPickupNotification(userId: string, orderId: string, minutesLeft: number) {
   try {
     const userDoc = await db.collection("users").doc(userId).get();
@@ -68,11 +62,41 @@ async function sendPickupNotification(userId: string, orderId: string, minutesLe
     };
 
     await admin.messaging().send(message);
-    console.log(`Notification sent for order ${orderId}, ${minutesLeft} minutes left`);
+    console.log(`Reminder sent: order ${orderId}, ${minutesLeft} mins left`);
   } catch (error) {
-    console.error("Error sending notification:", error);
+    console.error("Error sending reminder notification:", error);
   }
 }
+
+// 🔔 Send final notification after 30 minutes
+export async function sendFinalExpiryNotification(userId: string, orderId: string) {
+  try {
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (!userDoc.exists) return;
+
+    const userData = userDoc.data();
+    if (!userData?.fcmToken) return;
+
+    const message = {
+      token: userData.fcmToken,
+      notification: {
+        title: `Order ${orderId} Expired`,
+        body: `Your food is expired. You can no longer take your order.`,
+      },
+      data: {
+        order_id: orderId,
+        minutes_left: "0",
+        expired: "true",
+      },
+    };
+
+    await admin.messaging().send(message);
+    console.log(`Final expiry notification sent for order ${orderId}`);
+  } catch (error) {
+    console.error("Error sending final expiry notification:", error);
+  }
+}
+
 export const monitorPickupStatus = onSchedule("every 3 minutes", async (event) => {
   const now = admin.firestore.Timestamp.now();
 
@@ -83,7 +107,7 @@ export const monitorPickupStatus = onSchedule("every 3 minutes", async (event) =
 
   if (txSnapshot.empty) {
     console.log("No transactions waiting for pickup.");
-    return; // ✅ Ubah ini
+    return;
   }
 
   const batch = db.batch();
@@ -109,6 +133,7 @@ export const monitorPickupStatus = onSchedule("every 3 minutes", async (event) =
     const diffMinutes = Math.floor(diffMs / 60000);
 
     if (diffMinutes >= MAX_WAIT_TIME) {
+      // ⛔ Mark order as expired
       batch.update(doc.ref, {
         queue_number_status: "expired",
       });
@@ -119,8 +144,11 @@ export const monitorPickupStatus = onSchedule("every 3 minutes", async (event) =
         updated_at: now,
       }, { merge: true });
 
+      // 🔔 Send final expiry notification
+      await sendFinalExpiryNotification(userId, orderId);
       console.log(`Order ${orderId} expired after ${diffMinutes} minutes.`);
     } else {
+      // 🔔 Send notification every NOTIFY_INTERVAL
       if (diffMinutes % NOTIFY_INTERVAL === 0) {
         const minutesLeft = MAX_WAIT_TIME - diffMinutes;
         await sendPickupNotification(userId, orderId, minutesLeft);
@@ -129,5 +157,5 @@ export const monitorPickupStatus = onSchedule("every 3 minutes", async (event) =
   }
 
   await batch.commit();
-  return; // ✅ Ganti dari "return null"
+  return;
 });
