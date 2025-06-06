@@ -13,6 +13,7 @@ const navItems = [
   { label: "Users", href: "/admin/users", icon: <Users className="w-5 h-5 text-white" /> },
   { label: "Products", href: "/product", icon: <ShoppingBag className="w-5 h-5 text-white" /> },
   { label: "Order", href: "/order-queue", icon: <ClipboardList className="w-5 h-5 text-white" /> },
+  { label: "Reports", href: "/report", icon: <ClipboardList className="w-5 h-5 text-white" /> },
 ];
 
 export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
