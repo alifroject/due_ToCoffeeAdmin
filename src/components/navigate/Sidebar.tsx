@@ -7,13 +7,15 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../app/firebase/firebase";
 
 // ✅ Import Lucide Icons
-import { Users, ShoppingBag, ClipboardList, LogOut } from "lucide-react";
+import { House, ShoppingBag, ClipboardList, LogOut, Settings,  } from "lucide-react";
 
 const navItems = [
-  { label: "Users", href: "/admin/users", icon: <Users className="w-5 h-5 text-white" /> },
+  { label: "Dashboard", href: "/dashboard", icon: <House className="w-5 h-5 text-white" /> },
   { label: "Products", href: "/product", icon: <ShoppingBag className="w-5 h-5 text-white" /> },
   { label: "Order", href: "/order-queue", icon: <ClipboardList className="w-5 h-5 text-white" /> },
   { label: "Reports", href: "/report", icon: <ClipboardList className="w-5 h-5 text-white" /> },
+
+  { label: "Setting", href: "/setting", icon: <Settings className="w-5 h-5 text-white" /> },
 ];
 
 export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
