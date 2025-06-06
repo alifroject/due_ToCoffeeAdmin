@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import QueueNumberColumn from "../../components/reports/Sales";
+import Sales from "../../components/reports/Sales";
+import BestSelling from "../../components/reports/BestSelling";
 
 
 export default function Reports() {
@@ -11,7 +12,8 @@ export default function Reports() {
     return (
         <>
             <div className="text-black">
-                <QueueNumberColumn />
+                <Sales />
+                <BestSelling />
             </div>
         </>
     )
