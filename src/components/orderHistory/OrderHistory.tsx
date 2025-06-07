@@ -88,7 +88,7 @@ export default function OrderHistory() {
 
   useEffect(() => {
     router.replace(
-      `/order-history?fromYear=${fromYear}&fromMonth=${fromMonth}&fromDate=${fromDate}` +
+      `/transaction-history?fromYear=${fromYear}&fromMonth=${fromMonth}&fromDate=${fromDate}` +
       `&toYear=${toYear}&toMonth=${toMonth}&toDate=${toDate}`
     );
   }, [fromYear, fromMonth, fromDate, toYear, toMonth, toDate]);

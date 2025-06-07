@@ -21,7 +21,7 @@ const topNavItems = [
   { label: "Dashboard", href: "/dashboard", icon: <Home className="w-5 h-5 text-white" /> },
   { label: "Products", href: "/product", icon: <PackageOpen className="w-5 h-5 text-white" /> },
   { label: "Order Queue", href: "/order-queue", icon: <ListOrdered className="w-5 h-5 text-white" /> },
-  { label: "Order History", href: "/order-history", icon: <History className="w-5 h-5 text-white" /> },
+  { label: "Transaction History", href: "/transaction-history", icon: <History className="w-5 h-5 text-white" /> },
   { label: "Reports", href: "/report", icon: <BarChart className="w-5 h-5 text-white" /> },
 ];
 
