@@ -2,12 +2,12 @@ import { Item } from './item';
 import { Location } from './location';
 import { QueueStatus } from './queueStatus';
 import { RawWebhook } from './rawWebhook';
-
+import { Timestamp } from "firebase/firestore";
 export interface Transaction {
   order_id: string;
   amount: number;
   cartId: string;
-  created_at: Date;
+  created_at: Timestamp;
   custom_note: string;
   invoice_url: string;
   items: Item[];
