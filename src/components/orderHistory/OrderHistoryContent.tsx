@@ -1,7 +1,6 @@
 "use client";
 
 import React, { forwardRef } from "react";
-
 import { Transaction } from "./types/transaction";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
@@ -52,7 +51,6 @@ export default function OrderHistoryContent({
     timeStyle: "short",
   });
 
-  // Custom input component for DatePicker with icon inside
   const CustomInput = forwardRef<HTMLInputElement, any>(({ value, onClick }, ref) => (
     <div
       className="relative w-full"
@@ -72,7 +70,7 @@ export default function OrderHistoryContent({
 
   return (
     <section className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">📅 Order History</h1>
+      <h1 className="text-3xl font-bold mb-4">📦 Order History</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* From Date Picker */}
@@ -88,9 +86,8 @@ export default function OrderHistoryContent({
               }
             }}
             dateFormat="yyyy-MM-dd"
-            placeholderText="Pilih tanggal mulai"
             customInput={<CustomInput />}
-            maxDate={toDateObj} // Prevent picking from date after to date
+            maxDate={toDateObj}
           />
         </div>
 
@@ -107,9 +104,8 @@ export default function OrderHistoryContent({
               }
             }}
             dateFormat="yyyy-MM-dd"
-            placeholderText="Pilih tanggal selesai"
             customInput={<CustomInput />}
-            minDate={fromDateObj} // Prevent picking to date before from date
+            minDate={fromDateObj}
           />
         </div>
       </div>
@@ -120,7 +116,42 @@ export default function OrderHistoryContent({
         </p>
       </div>
 
-      {/* You can render your filtered transactions based on fromDateObj and toDateObj here */}
+      {loading ? (
+        <p className="mt-4 text-blue-600 font-semibold">Loading...</p>
+      ) : (
+        <div className="mt-4 space-y-4">
+          {transactions
+            .filter((transaction) => {
+              const transactionDate = transaction.created_at.toDate();
+              return transactionDate >= fromDateObj && transactionDate <= toDateObj;
+            })
+            .sort(
+              (a, b) =>
+                b.created_at.toDate().getTime() - a.created_at.toDate().getTime()
+            )
+            .map((transaction) => {
+              const transactionDate = transaction.created_at.toDate();
+              return (
+                <div
+                  key={transaction.order_id}
+                  className="border border-blue-200 rounded-xl p-4 shadow hover:shadow-md transition bg-white"
+                >
+                  <p className="font-bold">Order ID: {transaction.order_id}</p>
+                  <p>Amount: Rp {transaction.amount.toLocaleString("id-ID")}</p>
+                  <p>Status: {transaction.status}</p>
+                  <p>
+                    Created:{" "}
+                    {transactionDate.toLocaleString("id-ID", {
+                      dateStyle: "full",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                  <p>Customer: {transaction.userName} ({transaction.userEmail})</p>
+                </div>
+              );
+            })}
+        </div>
+      )}
     </section>
   );
 }
