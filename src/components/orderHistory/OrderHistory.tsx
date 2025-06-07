@@ -1,99 +1,117 @@
 "use client";
 
-
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { doc, onSnapshot, updateDoc, collection, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import Link from "next/link";
+import { Timestamp } from "firebase/firestore";
+
 import { dbFire } from "../../app/firebase/firebase";
-
-
-//types 
-
 import { Transaction } from "./types/transaction";
-import { Timestamp } from "firebase/firestore"; // ✅ correct
-
-import { error } from "console";
+import OrderHistoryContent from "./OrderHistoryContent";
 
 export default function OrderHistory() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const today = new Date();
-    const yearParam = searchParams.get("year") ?? today.getFullYear.toString();
-    const monthParam = searchParams.get("month") ?? (today.getMonth() + 1).toString().padStart(2, "0");
-    const dateParam = searchParams.get("date") ?? today.getDate().toString().padStart(2, "0")
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-    const [selectedYear, setSelectedYear] = useState(yearParam)
-    const [selectedMonth, setSelectedMonth] = useState(monthParam)
-    const [selectedDate, setSelectedDate] = useState(dateParam)
+  const today = new Date();
 
+  // Parse date range from URL params or default to today
+  const fromYearParam = searchParams.get("fromYear") ?? today.getFullYear().toString();
+  const fromMonthParam = searchParams.get("fromMonth") ?? (today.getMonth() + 1).toString().padStart(2, "0");
+  const fromDateParam = searchParams.get("fromDate") ?? today.getDate().toString().padStart(2, "0");
 
+  const toYearParam = searchParams.get("toYear") ?? today.getFullYear().toString();
+  const toMonthParam = searchParams.get("toMonth") ?? (today.getMonth() + 1).toString().padStart(2, "0");
+  const toDateParam = searchParams.get("toDate") ?? today.getDate().toString().padStart(2, "0");
 
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-    const [orderId, setOrderId] = useState("");
+  // State for "From" date
+  const [fromYear, setFromYear] = useState(fromYearParam);
+  const [fromMonth, setFromMonth] = useState(fromMonthParam);
+  const [fromDate, setFromDate] = useState(fromDateParam);
 
-    useEffect(() => {
-        const auth = getAuth();
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const token = await user.getIdTokenResult(true);
-                const isAdmin =
-                    token.claims.role === "admin" || user.email === "due-to2026@gmail.com";
-                setIsAdmin(isAdmin);
-            } else {
-                setIsAdmin(false);
-            }
-        })
-    }, []);
+  // State for "To" date
+  const [toYear, setToYear] = useState(toYearParam);
+  const [toMonth, setToMonth] = useState(toMonthParam);
+  const [toDate, setToDate] = useState(toDateParam);
 
-    // onSnapshot to fetch transactions
-    useEffect(() => {
-        const startDate = new Date(`${selectedYear}-${selectedMonth}-${selectedDate}`);
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 1);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const token = await user.getIdTokenResult(true);
+        const isAdmin = token.claims.role === "admin" || user.email === "due-to2026@gmail.com";
+        setIsAdmin(isAdmin);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+  }, []);
 
-        const startTimestamp = Timestamp.fromDate(startDate);
-        const endTimestamp = Timestamp.fromDate(endDate);
+  useEffect(() => {
+    // Build from and to Date objects
+    const fromDateObj = new Date(`${fromYear}-${fromMonth}-${fromDate}`);
+    const toDateObj = new Date(`${toYear}-${toMonth}-${toDate}`);
+    // Add one day to include the whole 'toDate'
+    toDateObj.setDate(toDateObj.getDate() + 1);
 
+    const startTimestamp = Timestamp.fromDate(fromDateObj);
+    const endTimestamp = Timestamp.fromDate(toDateObj);
 
-        const q = query(
-            collection(dbFire, "transactions"),
-            where("status", "==", "paid"),
-            where("created_at", ">=", startTimestamp),
-            where("created_at", "<", endTimestamp)
+    const q = query(
+      collection(dbFire, "transactions"),
+      where("status", "==", "paid"),
+      where("created_at", ">=", startTimestamp),
+      where("created_at", "<", endTimestamp)
+    );
 
-        );
-        const onSubscribe = onSnapshot(q, (snapshot) => {
-            const data: Transaction[] = snapshot.docs.map((doc) => ({
-                ...(doc.data() as Transaction),
-            }));
-            setTransactions(data);
-            setLoading(false)
-        }, (error) => {
-            console.log("Failed to fetch transactions", error);
-            setLoading(false)
-        });
-        return () => onSubscribe();
+    setLoading(true);
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data: Transaction[] = snapshot.docs.map((doc) => doc.data() as Transaction);
+        setTransactions(data);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Failed to fetch transactions", error);
+        setLoading(false);
+      }
+    );
 
-    }, [selectedYear, selectedMonth, selectedDate])
-    
-    if (isAdmin === null)
-        return <p className="text-gray-500 p-6">Checking admin access...</p>;
-    if (!isAdmin)
-        return (
-            <p className="text-red-600 font-semibold p-6">⛔ Access denied. Admins only.</p>
-        );
+    return () => unsubscribe();
+  }, [fromYear, fromMonth, fromDate, toYear, toMonth, toDate]);
 
-    return (
-        <>
-            <div className="p-6">
-               <h1>Order History</h1>
-            </div>
-        </>
-    )
+  useEffect(() => {
+    router.replace(
+      `/order-history?fromYear=${fromYear}&fromMonth=${fromMonth}&fromDate=${fromDate}` +
+      `&toYear=${toYear}&toMonth=${toMonth}&toDate=${toDate}`
+    );
+  }, [fromYear, fromMonth, fromDate, toYear, toMonth, toDate]);
 
+  if (isAdmin === null) return <p className="text-gray-500 p-6">Checking admin access...</p>;
+  if (!isAdmin) return <p className="text-red-600 font-semibold p-6">⛔ Access denied. Admins only.</p>;
+
+  return (
+    <OrderHistoryContent
+      transactions={transactions}
+      loading={loading}
+      fromYear={fromYear}
+      fromMonth={fromMonth}
+      fromDate={fromDate}
+      toYear={toYear}
+      toMonth={toMonth}
+      toDate={toDate}
+      setFromYear={setFromYear}
+      setFromMonth={setFromMonth}
+      setFromDate={setFromDate}
+      setToYear={setToYear}
+      setToMonth={setToMonth}
+      setToDate={setToDate}
+    />
+  );
 }
