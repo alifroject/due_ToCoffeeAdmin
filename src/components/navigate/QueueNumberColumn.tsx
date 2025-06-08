@@ -23,10 +23,11 @@ export default function MarkPickedUpButton({ order_id }: Props) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const ready = data?.queue_status?.ready_for_pickup;
+          const queuNumberStatus = data?.queue_number_status
+          //const ready = data?.queue_status?.ready_for_pickup;
           const picked = data?.queue_status?.picked_up;
 
-          setIsClickable(ready === true && picked !== true);
+          setIsClickable(queuNumberStatus === "waiting");
           setPickedUp(picked === true);
         }
         setLoading(false);

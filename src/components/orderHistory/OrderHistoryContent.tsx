@@ -6,6 +6,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { IoMdArrowDropdown } from "react-icons/io";
 import Link from "next/link";
+import { exportTransactionsToCSV } from "@/components/utils/exportToCSV";
+
 
 
 type Props = {
@@ -76,8 +78,35 @@ export default function OrderHistoryContent({
     return (
         <section className="p-6 mx-auto">
             <div className="bg-white border border-blue-200 rounded-xl p-6 shadow-md space-y-6">
-                {/* Row 1: Title */}
-                <h1 className="text-3xl font-bold">📦 Transaction History</h1>
+                <div className="relative bg-white border border-blue-200 rounded-xl p-6 shadow-md space-y-6">
+                    {/* Export button on top-right corner */}
+                    <button
+                        className="absolute top-4 right-4 flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                        onClick={() =>
+                            exportTransactionsToCSV(
+                                transactions,
+                                fromDateObj,
+                                toDateObj,
+                                selectedStatus
+                            )
+                        }
+                    >
+                        <span className="text-sm font-semibold">Export</span>
+                        <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
+                        </svg>
+                    </button>
+
+
+                    {/* Title centered in content */}
+                    <h1 className="text-3xl font-bold">📦 Transaction History</h1>
+                </div>
 
                 {/* Row 2: Filter controls */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -186,13 +215,13 @@ export default function OrderHistoryContent({
                                                 {transaction.userName} ({transaction.userEmail})
                                             </td>
                                             <td>
-                                               <Link
-                                               href={`/transaction-history/${transaction.order_id}`}
-                                               className="text-red-600"
-                                               >
-                                                View
+                                                <Link
+                                                    href={`/transaction-history/${transaction.order_id}`}
+                                                    className="text-red-600"
+                                                >
+                                                    View
 
-                                               </Link>
+                                                </Link>
                                             </td>
                                         </tr>
                                     );

@@ -97,7 +97,7 @@ export async function sendFinalExpiryNotification(userId: string, orderId: strin
   }
 }
 
-export const monitorPickupStatus = onSchedule("every 3 minutes", async (event) => {
+export const monitorPickupStatus = onSchedule("every 1 minutes", async (event) => {
   const now = admin.firestore.Timestamp.now();
 
   const txSnapshot = await db.collection("transactions")
@@ -105,10 +105,7 @@ export const monitorPickupStatus = onSchedule("every 3 minutes", async (event) =
     .where("queue_number_status", "==", "waiting")
     .get();
 
-  if (txSnapshot.empty) {
-    console.log("No transactions waiting for pickup.");
-    return;
-  }
+ 
 
   const batch = db.batch();
 
@@ -149,10 +146,13 @@ export const monitorPickupStatus = onSchedule("every 3 minutes", async (event) =
       console.log(`Order ${orderId} expired after ${diffMinutes} minutes.`);
     } else {
       // 🔔 Send notification every NOTIFY_INTERVAL
-      if (diffMinutes % NOTIFY_INTERVAL === 0) {
-        const minutesLeft = MAX_WAIT_TIME - diffMinutes;
+      const minutesLeft = MAX_WAIT_TIME - diffMinutes;
+      const isCloseToNotifyInterval = minutesLeft % NOTIFY_INTERVAL <= 1;
+
+      if (isCloseToNotifyInterval && minutesLeft > 0) {
         await sendPickupNotification(userId, orderId, minutesLeft);
       }
+
     }
   }
 
