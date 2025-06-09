@@ -2,41 +2,43 @@
 
 import { useEffect, useState } from "react";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
-import { dbFire } from "../../app/firebase/firebase";
-import { CheckCircleIcon } from "@heroicons/react/24/solid"; // Or any icon you want to use
+import { dbFire } from "@/app/firebase/firebase";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import QRScannerPopup from "./QRScannerAutoPickup";
 
 interface Props {
   order_id: string;
+  onClose: () => void;
 }
 
-
 export default function MarkPickedUpButton({ order_id }: Props) {
-  const [isClickable, setIsClickable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pickedUp, setPickedUp] = useState(false);
+  const [isClickable, setIsClickable] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+  const [showChecklist, setShowChecklist] = useState(false);
 
   useEffect(() => {
     const transactionRef = doc(dbFire, "transactions", order_id);
 
-    const unsubscribe = onSnapshot(
-      transactionRef,
-      (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const queuNumberStatus = data?.queue_number_status
-          //const ready = data?.queue_status?.ready_for_pickup;
-          const picked = data?.queue_status?.picked_up;
+    const unsubscribe = onSnapshot(transactionRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const isPickedUp = data?.queue_status?.picked_up === true;
+        setPickedUp(isPickedUp);
+        setIsClickable(data?.queue_number_status === "waiting");
 
-          setIsClickable(queuNumberStatus === "waiting");
-          setPickedUp(picked === true);
+        if (isPickedUp) {
+          setFadeOut(true);
+          setTimeout(() => setShowChecklist(true), 300);
+        } else {
+          setFadeOut(false);
+          setShowChecklist(false);
         }
-        setLoading(false);
-      },
-      (error) => {
-        console.error("Error listening to transaction:", error);
-        setLoading(false);
       }
-    );
+      setLoading(false);
+    });
 
     return () => unsubscribe();
   }, [order_id]);
@@ -54,45 +56,77 @@ export default function MarkPickedUpButton({ order_id }: Props) {
       await updateDoc(queueRef, {
         queue_number_status: "picked up",
       });
-
-      alert("Status updated to picked up.");
-      setIsClickable(false);
-      setPickedUp(true);
     } catch (error) {
-      console.error("Failed to update status:", error);
       alert("Failed to update status. Please try again.");
+      console.error(error);
     }
+  };
+
+  const handleScanSuccess = async () => {
+    setShowScanner(false);
+    setFadeOut(true);
+    await markPickedUp();
+
+    setShowChecklist(false);
+    setTimeout(() => setShowChecklist(true), 1000);
   };
 
   if (loading) {
     return (
-      <button className="px-4 py-2 bg-gray-400 text-white rounded cursor-wait" disabled>
+      <button disabled className="px-4 py-2 bg-gray-400 text-white rounded cursor-wait">
         Loading...
       </button>
     );
   }
 
-  if (pickedUp) {
-    // Show checklist icon and message instead of button
-    return (
-      <div className="flex items-center space-x-2 text-green-600 font-semibold">
-        <CheckCircleIcon className="w-6 h-6" />
-        <span>this is picked up by customer</span>
-      </div>
-    );
-  }
-
   return (
-    <button
-      onClick={markPickedUp}
-      disabled={!isClickable}
-      className={`px-4 py-2 rounded text-white transition-all duration-200 ${
-        isClickable
-          ? "bg-green-500 hover:bg-green-600 cursor-pointer"
-          : "bg-gray-400 cursor-not-allowed"
-      }`}
-    >
-      Mark Picked Up
-    </button>
+    <>
+      {/* Fixed-height container to avoid layout jump */}
+      <div className="min-h-[48px] flex items-center justify-center">
+        {!fadeOut && (
+          <div className="flex gap-3 transition-opacity duration-300 opacity-100">
+            <button
+              onClick={async () => {
+                await markPickedUp();
+                setFadeOut(true);
+                setTimeout(() => setShowChecklist(true), 300);
+              }}
+              disabled={!isClickable}
+              className={`px-4 py-2 rounded text-white transition-all duration-200 ${
+                isClickable ? "bg-green-500 hover:bg-green-600" : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Manual
+            </button>
+
+            <button
+              onClick={() => setShowScanner(true)}
+              disabled={!isClickable}
+              className={`px-4 py-2 rounded text-white transition-all duration-200 ${
+                isClickable ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Scan
+            </button>
+          </div>
+        )}
+
+        {fadeOut && showChecklist && (
+          <div className="inline-flex items-center space-x-2 text-green-600 font-semibold">
+            <CheckCircleIcon className="w-6 h-6" />
+            <span>Picked up successfully!</span>
+          </div>
+        )}
+      </div>
+
+      {/* Scanner popup */}
+      {showScanner && (
+        <QRScannerPopup
+          order_id={order_id}
+          onClose={() => setShowScanner(false)}
+          onSuccess={handleScanSuccess}
+        />
+      )}
+    </>
   );
 }

@@ -136,7 +136,7 @@ export default function QueuePage() {
         {/* Filter Section */}
         <div className="bg-blue-50 bg-white border border-blue-200 p-4 rounded-lg shadow-inner mb-6">
           <h1 className="text-3xl font-bold mb-6 text-gray-800 px-4 py-2 rounded shadow-inner text-center">
-            🧾 Order Queue, change in flutter to count down from 30minutes in waiting queue
+            Order Queue
           </h1>
 
           <div className="flex flex-wrap justify-between items-start gap-4 font-[Inter]">
@@ -231,7 +231,7 @@ export default function QueuePage() {
         ) : (
           <div className="overflow-x-auto bg-white border border-gray-200 rounded-xl shadow-lg">
             <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-blue-100 text-blue-900">
+              <thead className="bg-blue-100 text-blue-900 border-b border-gray-300">
                 <tr>
                   <th className="px-6 py-3 text-left font-semibold">Order ID</th>
                   <th className="px-6 py-3 text-left font-semibold">User Name</th>
@@ -242,9 +242,9 @@ export default function QueuePage() {
                   <th className="px-6 py-3 text-center font-semibold">Queue Number</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 border-b border-gray-300">
                 {transactions.map((tx, index) => (
-                  <tr key={index} className="hover:bg-gray-50 transition">
+                  <tr key={index} className="hover:bg-gray-50 transition border-b border-gray-300">
                     <td className="px-6 py-4 font-medium text-gray-800">{tx.order_id}</td>
                     <td className="px-6 py-4 text-gray-700">{tx.userName}</td>
                     <td className="px-6 py-4 text-gray-600">
@@ -321,9 +321,9 @@ export default function QueuePage() {
                       </Link>
                     </td>
 
-                    <td colSpan={6}>
-                      <QueueNumberColumn order_id={tx.order_id} />
-                     
+                    <td colSpan={6} >
+                      <QueueNumberColumn order_id={tx.order_id} onClose={() => {/* ... */ }} />
+
                     </td>
 
                   </tr>
