@@ -105,7 +105,7 @@ export const monitorPickupStatus = onSchedule("every 1 minutes", async (event) =
     .where("queue_number_status", "==", "waiting")
     .get();
 
- 
+
 
   const batch = db.batch();
 
@@ -133,12 +133,14 @@ export const monitorPickupStatus = onSchedule("every 1 minutes", async (event) =
       // ⛔ Mark order as expired
       batch.update(doc.ref, {
         queue_number_status: "expired",
+        custom_note: "You cannot take your order anymore."
       });
 
       const queueDocRef = db.collection("queue").doc(orderId);
       batch.set(queueDocRef, {
         queue_number_status: "expired",
         updated_at: now,
+        custom_note: "You cannot take your order anymore."
       }, { merge: true });
 
       // 🔔 Send final expiry notification
