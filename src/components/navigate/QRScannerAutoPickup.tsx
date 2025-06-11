@@ -2,25 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 
 interface Props {
-  order_id?: string;
+  order_id: string;
   onClose: () => void;
-  onSuccess: () => void; // callback for success
+  onSuccess: () => void;
 }
 
-export default function QRScannerPopup({ onClose, onSuccess }: Props) {
-  const [success, setSuccess] = useState(false);
+export default function QRScannerPopup({ order_id, onClose, onSuccess }: Props) {
+  const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [loading, setLoading] = useState(false); // for spinner after scan
+  const [loading, setLoading] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
-
-  const stopCamera = () => {
-    const video = document.querySelector("video");
-    if (video && video.srcObject) {
-      const stream = video.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
-      video.srcObject = null;
-    }
-  };
 
   useEffect(() => {
     const qrRegion = document.getElementById("qr-reader");
@@ -38,23 +30,32 @@ export default function QRScannerPopup({ onClose, onSuccess }: Props) {
 
     scannerRef.current.render(
       async (decodedText: string) => {
-        try {
-          if (scannerRef.current) {
-            await scannerRef.current.clear();
-            stopCamera();
-            scannerRef.current = null;
-          }
-          setSuccess(true);
-          setLoading(true); // show spinner
+        if (processing) return;
+        setProcessing(true);
+        setLoading(true);
 
-          // Wait 1 second (simulate processing)
-          setTimeout(() => {
+        try {
+          if (decodedText === order_id) {
+            setSuccessMsg("QR Code is valid!");
+            setErrorMsg("");
+
+            setTimeout(() => {
+              setLoading(false);
+              onSuccess();
+              handleClose();
+            }, 1500);
+          } else {
+            setErrorMsg("QR code mismatch. Please scan the correct code.");
+            setSuccessMsg("");
             setLoading(false);
-            onSuccess(); // notify parent to update status & UI
-            onClose();   // close popup automatically
-          }, 1000);
-        } catch {
+            setProcessing(false);
+          }
+        } catch (err) {
           setErrorMsg("Failed to process QR code.");
+          setSuccessMsg("");
+          setLoading(false);
+          setProcessing(false);
+          console.error(err);
         }
       },
       (error) => {
@@ -66,17 +67,15 @@ export default function QRScannerPopup({ onClose, onSuccess }: Props) {
 
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(() => {});
-        stopCamera();
+        scannerRef.current.clear();
         scannerRef.current = null;
       }
     };
-  }, [onClose, onSuccess]);
+  }, []); // <--- IMPORTANT: empty dependency array
 
-  const handleClose = async () => {
+  const handleClose = () => {
     if (scannerRef.current) {
-      await scannerRef.current.clear().catch(() => {});
-      stopCamera();
+      scannerRef.current.clear();
       scannerRef.current = null;
     }
     onClose();
@@ -99,9 +98,11 @@ export default function QRScannerPopup({ onClose, onSuccess }: Props) {
           ✕
         </button>
 
-        {loading ? (
-          <div className="flex justify-center items-center h-24">
-            {/* Simple spinner */}
+        <h2 className="text-lg text-black font-bold mb-4">Scan QR Code</h2>
+        <div id="qr-reader" className="w-full" />
+
+        {loading && (
+          <div className="flex flex-col justify-center items-center h-24 mt-2">
             <svg
               className="animate-spin h-8 w-8 text-blue-600"
               xmlns="http://www.w3.org/2000/svg"
@@ -122,17 +123,28 @@ export default function QRScannerPopup({ onClose, onSuccess }: Props) {
                 d="M4 12a8 8 0 018-8v8H4z"
               ></path>
             </svg>
+
+            <div className="flex items-center mt-3 text-sm text-gray-700">
+              <svg
+                className="w-5 h-5 mr-2 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2l4-4m5 2a9 9 0 11-18 0a9 9 0 0118 0z" />
+              </svg>
+              <span>This order has been scanned...</span>
+            </div>
           </div>
-        ) : success ? (
-          <div className="flex flex-col text-black items-center text-green-600">
-            <p className="text-lg font-semibold">Order marked as picked up!</p>
-          </div>
-        ) : (
-          <>
-            <h2 className="text-lg text-black font-bold mb-4">Scan QR Code</h2>
-            <div id="qr-reader" className="w-full" />
-            {errorMsg && <p className="text-red-600 mt-2">{errorMsg}</p>}
-          </>
+        )}
+
+
+        {successMsg && (
+          <p className="text-green-600 mt-4 font-semibold">{successMsg}</p>
+        )}
+        {errorMsg && (
+          <p className="text-red-600 mt-4 font-semibold">{errorMsg}</p>
         )}
       </div>
     </div>
