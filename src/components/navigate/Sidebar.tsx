@@ -11,10 +11,9 @@ import {
   Home,
   PackageOpen,
   ListOrdered,
-  History,
-  BarChart,
-  Settings,
+  History, Settings,
   LogOut,
+  DollarSign
 } from "lucide-react";
 
 const topNavItems = [
@@ -22,7 +21,7 @@ const topNavItems = [
   { label: "Products", href: "/product", icon: <PackageOpen className="w-5 h-5 text-white" /> },
   { label: "Order Queue", href: "/order-queue", icon: <ListOrdered className="w-5 h-5 text-white" /> },
   { label: "Transaction History", href: "/transaction-history", icon: <History className="w-5 h-5 text-white" /> },
-  { label: "Reports", href: "/report", icon: <BarChart className="w-5 h-5 text-white" /> },
+  { label: "Discounts Management", href: "/discount", icon: <DollarSign className="w-5 h-5 text-white" /> },
 ];
 
 const settingItem = {
