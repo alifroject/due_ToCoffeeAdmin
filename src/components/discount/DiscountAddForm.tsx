@@ -102,43 +102,40 @@ export default function DiscountAddForm({ onClose }: Props) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white w-full max-w-lg max-h-[90vh] p-6 rounded-2xl shadow-xl relative animate-fadeIn flex flex-col">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white w-full max-w-5xl max-h-[90vh] p-8 rounded-2xl shadow-2xl relative animate-fadeIn overflow-hidden">
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition"
+            className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
 
-          <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
+          <h2 className="text-3xl font-bold mb-8 text-gray-800 text-center">
             Add New Discount
           </h2>
-          <div className="overflow-y-auto flex-1 pr-1">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Discount Name
-                </label>
+
+          <div className="overflow-y-auto max-h-[70vh] pr-2">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Discount Name */}
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Discount Name</label>
                 <input
                   type="text"
                   name="name"
                   placeholder="e.g. Summer Sale"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={handleChange}
                   required
                 />
               </div>
 
               {/* Discount Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Discount Type
-                </label>
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type</label>
                 <select
                   name="discountType"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value)}
                   required
@@ -149,19 +146,18 @@ export default function DiscountAddForm({ onClose }: Props) {
                   <option value="event">Event</option>
                 </select>
               </div>
+
+              {/* Conditional Fields for BOGO */}
               {discountType === "bogo" && (
                 <>
-                  {/* Item/Collection Dropdown */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Select Collection
-                    </label>
+                  <div className="col-span-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Select Collection</label>
                     <select
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={selectedItem}
                       onChange={(e) => {
                         setSelectedItem(e.target.value);
-                        setSelectedProduct(""); // reset product
+                        setSelectedProduct("");
                       }}
                       required
                     >
@@ -170,18 +166,16 @@ export default function DiscountAddForm({ onClose }: Props) {
                       <option value="drinks">Drinks</option>
                       <option value="pastries">Pastries</option>
                       <option value="foods">Foods</option>
-
                     </select>
                   </div>
 
-                  {/* Product Dropdown */}
                   {selectedItem && (
-                    <div>
+                    <div className="col-span-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Select Product from {selectedItem.charAt(0).toUpperCase() + selectedItem.slice(1)}
                       </label>
                       <select
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={selectedProduct}
                         onChange={(e) => setSelectedProduct(e.target.value)}
                         required
@@ -193,76 +187,63 @@ export default function DiscountAddForm({ onClose }: Props) {
                           </option>
                         ))}
                       </select>
-
                     </div>
                   )}
-
                 </>
               )}
 
-
               {/* Percentage */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Percentage (%)
-                </label>
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Percentage (%)</label>
                 <input
                   type="number"
                   name="percentage"
                   placeholder="e.g. 25"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={handleChange}
                   required
                 />
               </div>
 
-              {/* Duration */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration From
-                  </label>
-                  <DatePicker
-                    selected={formData.durationFrom}
-                    onChange={(date) =>
-                      date && setFormData((prev) => ({ ...prev, durationFrom: date }))
-                    }
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration To
-                  </label>
-                  <DatePicker
-                    selected={formData.durationTo}
-                    onChange={(date) =>
-                      date && setFormData((prev) => ({ ...prev, durationTo: date }))
-                    }
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
               {/* Minimum Purchase */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Minimum Purchase
-                </label>
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Purchase</label>
                 <input
                   type="number"
                   name="minimumPurchase"
                   placeholder="e.g. 50"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={handleChange}
                 />
               </div>
 
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Upload Banner/Image
-                </label>
+              {/* Duration From */}
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Duration From</label>
+                <DatePicker
+                  selected={formData.durationFrom}
+                  onChange={(date) =>
+                    date && setFormData((prev) => ({ ...prev, durationFrom: date }))
+                  }
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Duration To */}
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Duration To</label>
+                <DatePicker
+                  selected={formData.durationTo}
+                  onChange={(date) =>
+                    date && setFormData((prev) => ({ ...prev, durationTo: date }))
+                  }
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Upload Image */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Banner/Image</label>
                 <div
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={async (e) => {
@@ -270,11 +251,8 @@ export default function DiscountAddForm({ onClose }: Props) {
                     const file = e.dataTransfer.files[0];
                     if (file) await handleImageUpload({ target: { files: [file] } } as any);
                   }}
-                  onClick={() => {
-                    const input = document.getElementById("imageInput");
-                    input?.click();
-                  }}
-                  className="w-full border-2 border-dashed border-blue-300 bg-blue-50 rounded-md cursor-pointer text-center p-6 hover:bg-blue-100 transition"
+                  onClick={() => document.getElementById("imageInput")?.click()}
+                  className="w-full border-2 border-dashed border-blue-300 bg-blue-50 rounded-lg cursor-pointer text-center p-6 hover:bg-blue-100 transition"
                 >
                   <p className="text-gray-600">
                     {uploading ? "Uploading..." : "Click or Drag & Drop to upload image"}
@@ -291,43 +269,44 @@ export default function DiscountAddForm({ onClose }: Props) {
                 {formData.image && (
                   <div className="mt-4">
                     <p className="text-sm text-gray-600 mb-1">Preview:</p>
-                    <div className="border rounded-md">
+                    <div className="border rounded-lg overflow-hidden">
                       <img
                         src={formData.image}
                         alt="Uploaded"
-                        className="w-full object-contain"
+                        className="w-full object-contain max-h-64"
                       />
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Comment / Notes */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes or Terms
-                </label>
+              {/* Notes */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes or Terms</label>
                 <textarea
                   name="comment"
                   rows={3}
                   placeholder="Internal notes or public terms"
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={handleChange}
                 />
               </div>
 
               {/* Submit */}
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-medium transition"
-                disabled={uploading}
-              >
-                {uploading ? "Uploading image..." : "Submit Discount"}
-              </button>
+              <div className="col-span-2">
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-lg transition"
+                  disabled={uploading}
+                >
+                  {uploading ? "Uploading image..." : "Submit Discount"}
+                </button>
+              </div>
             </form>
           </div>
         </div>
       </div>
+
     </>
   );
 }

@@ -24,7 +24,16 @@ export default function DiscountEditForm({ id, onClose }: Props) {
         comment: "",
         image: "",
         minimumPurchase: 0,
+        type: "",               // NEW
+        selectedItem: "",       // NEW
+        selectedProduct: "",    // NEW
     });
+    const itemOptions = [
+        { value: "collection", label: "By Collection" },
+        { value: "category", label: "By Category" },
+    ];
+
+
 
     useEffect(() => {
         if (!id) return;
@@ -43,7 +52,11 @@ export default function DiscountEditForm({ id, onClose }: Props) {
                         comment: data.comment || "",
                         image: data.image || "",
                         minimumPurchase: data.minimumPurchase || 0,
+                        type: data.type || "",
+                        selectedItem: data.selectedItem || "",
+                        selectedProduct: data.selectedProduct || "",
                     });
+
                 }
             } catch (error) {
                 console.error("Failed to fetch discount:", error);
@@ -118,8 +131,12 @@ export default function DiscountEditForm({ id, onClose }: Props) {
             comment: "",
             image: "",
             minimumPurchase: 0,
+            type: "",               // included
+            selectedItem: "",       // included
+            selectedProduct: "",    // included
         });
     };
+
 
 
     return (
@@ -173,6 +190,70 @@ export default function DiscountEditForm({ id, onClose }: Props) {
                                     required
                                 />
                             </div>
+
+                            {/* Discount Type */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type</label>
+                                <select
+                                    name="type"
+                                    value={formData.type}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-2 border rounded-md"
+                                >
+                                    <option value="">Select Type</option>
+                                    <option value="percentage">Percentage</option>
+                                    <option value="fixed">Fixed Amount</option>
+                                </select>
+                            </div>
+
+                            {/* Apply To */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Apply To</label>
+                                <select
+                                    name="selectedItem"
+                                    value={formData.selectedItem}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-2 border rounded-md"
+                                >
+                                    <option value="">Select Item</option>
+                                    {itemOptions.map((item) => (
+                                        <option key={item.value} value={item.value}>
+                                            {item.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* Product/Collection/Category */}
+                            {formData.selectedItem && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {formData.selectedItem === "collection"
+                                            ? "Select Collection"
+                                            : "Select Category"}
+                                    </label>
+                                    <select
+                                        name="selectedProduct"
+                                        value={formData.selectedProduct}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border rounded-md"
+                                    >
+                                        <option value="">Select</option>
+                                        {/* For demo purposes, static options */}
+                                        {formData.selectedItem === "collection" ? (
+                                            <>
+                                                <option value="summer">Summer Collection</option>
+                                                <option value="winter">Winter Collection</option>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <option value="shoes">Shoes</option>
+                                                <option value="bags">Bags</option>
+                                            </>
+                                        )}
+                                    </select>
+                                </div>
+                            )}
+
 
                             {/* Duration */}
                             <div className="grid grid-cols-2 gap-4">
