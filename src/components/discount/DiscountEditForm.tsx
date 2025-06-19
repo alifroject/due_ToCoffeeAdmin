@@ -24,7 +24,9 @@ export default function DiscountEditForm({ id, onClose }: Props) {
         comment: "",
         image: "",
         minimumPurchase: 0,
-        type: "",               // NEW
+        type: "",
+        bogoItem: "",
+        bogoProduct: "",         // NEW
         selectedItem: "",       // NEW
         selectedProduct: "",    // NEW
     });
@@ -53,6 +55,8 @@ export default function DiscountEditForm({ id, onClose }: Props) {
                         image: data.image || "",
                         minimumPurchase: data.minimumPurchase || 0,
                         type: data.type || "",
+                        bogoItem: data.bogoItem || "",
+                        bogoProduct: data.bogoProduct || "",
                         selectedItem: data.selectedItem || "",
                         selectedProduct: data.selectedProduct || "",
                     });
@@ -131,7 +135,9 @@ export default function DiscountEditForm({ id, onClose }: Props) {
             comment: "",
             image: "",
             minimumPurchase: 0,
-            type: "",               // included
+            type: "",
+            bogoItem: "",
+            bogoProduct: "",              // included
             selectedItem: "",       // included
             selectedProduct: "",    // included
         });
@@ -194,35 +200,56 @@ export default function DiscountEditForm({ id, onClose }: Props) {
                             {/* Discount Type */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type</label>
-                                <select
+                                <input
+                                    type="text"
                                     name="type"
-                                    value={formData.type}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border rounded-md"
-                                >
-                                    <option value="">Select Type</option>
-                                    <option value="percentage">Percentage</option>
-                                    <option value="fixed">Fixed Amount</option>
-                                </select>
+                                    value={formData.type === "bogo" ? "Buy One Get One" : formData.type}
+                                    readOnly
+                                    className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-700 cursor-not-allowed"
+                                />
+                                <p className="mt-1 text-sm text-red-500">
+                                    * We cannot edit this type. To change it, please delete this discount.
+                                </p>
                             </div>
 
-                            {/* Apply To */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Apply To</label>
-                                <select
-                                    name="selectedItem"
-                                    value={formData.selectedItem}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border rounded-md"
-                                >
-                                    <option value="">Select Item</option>
-                                    {itemOptions.map((item) => (
-                                        <option key={item.value} value={item.value}>
-                                            {item.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            {/* BOGO Item */}
+                            {formData.bogoItem && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">BOGO Item</label>
+                                    <input
+                                        type="text"
+                                        name="bogoItem"
+                                        value={formData.bogoItem}
+                                        readOnly
+                                        className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-700 cursor-not-allowed"
+                                    />
+                                    <p className="mt-1 text-sm text-red-500">
+                                        * This is fixed. To change, please delete and recreate the discount.
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* BOGO Product */}
+                            {formData.bogoProduct && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">BOGO Product</label>
+                                    <input
+                                        type="text"
+                                        name="bogoProduct"
+                                        value={formData.bogoProduct}
+                                        readOnly
+                                        className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-700 cursor-not-allowed"
+                                    />
+                                    <p className="mt-1 text-sm text-red-500">
+                                        * This is fixed. To change, please delete and recreate the discount.
+                                    </p>
+                                </div>
+                            )}
+
+
+
+
+
                             {/* Product/Collection/Category */}
                             {formData.selectedItem && (
                                 <div>
