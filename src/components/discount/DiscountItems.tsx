@@ -45,64 +45,62 @@ export default function DiscountItems() {
   };
 
   return (
-    <div className="mt-6 space-y-4">
-      {mockDiscounts.map((discount) => (
-        <div
-          key={discount.id}
-          className="bg-white rounded-lg shadow-md p-4 border border-gray-100 flex flex-col md:flex-row gap-4"
-        >
-          {/* Image */}
-          {discount.image ? (
-            <img
-              src={discount.image}
-              alt={discount.name}
-              className="w-24 h-24 object-cover rounded-md"
-            />
-          ) : (
-            <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md text-gray-500 text-sm">
-              No Image
-            </div>
-          )}
-
-          {/* Details */}
-          <div className="flex-1 space-y-1">
-            <h2 className="text-xl font-semibold text-gray-800">{discount.name}</h2>
-            <p className="text-sm text-gray-600">
-              <strong>Percentage:</strong> {discount.percentage}
-            </p>
-            <p className="text-sm text-gray-600">
-              <strong>Duration:</strong> {discount.duration}
-            </p>
-            {discount.minimumPurchase && (
-              <p className="text-sm text-gray-600">
-                <strong>Min. Purchase:</strong> {discount.minimumPurchase}
-              </p>
-            )}
-            {discount.comment && (
-              <p className="text-sm text-gray-500 italic">{discount.comment}</p>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex md:flex-col gap-2 self-start">
-            <button
-              onClick={() => handleEdit(discount.id)}
-              className="flex items-center gap-1 px-3 py-1 bg-yellow-500 text-white rounded-md text-sm hover:bg-yellow-600 transition"
-            >
-              <Pencil className="w-4 h-4" />
-              Edit
-            </button>
-
-            <button
-              onClick={() => handleDelete(discount.id)}
-              className="flex items-center gap-1 px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 transition"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete
-            </button>
-          </div>
-        </div>
-      ))}
+    <div className="mt-6 overflow-x-auto">
+      <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+        <thead className="bg-gray-50 text-left text-sm text-gray-600 uppercase tracking-wider">
+          <tr>
+            <th className="p-4">Image</th>
+            <th className="p-4">Name</th>
+            <th className="p-4">Percentage</th>
+            <th className="p-4">Duration</th>
+            <th className="p-4">Min. Purchase</th>
+            <th className="p-4">Comment</th>
+            <th className="p-4 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="text-sm divide-y divide-gray-100">
+          {mockDiscounts.map((discount) => (
+            <tr key={discount.id} className="hover:bg-gray-50 transition">
+              <td className="p-4">
+                {discount.image ? (
+                  <img
+                    src={discount.image}
+                    alt={discount.name}
+                    className="w-14 h-14 object-cover rounded-md border border-gray-200"
+                  />
+                ) : (
+                  <div className="w-14 h-14 bg-gray-200 flex items-center justify-center rounded-md text-xs text-gray-500">
+                    No Image
+                  </div>
+                )}
+              </td>
+              <td className="p-4 font-medium text-gray-800">{discount.name}</td>
+              <td className="p-4">{discount.percentage}</td>
+              <td className="p-4">{discount.duration}</td>
+              <td className="p-4">{discount.minimumPurchase ?? "-"}</td>
+              <td className="p-4 text-gray-500 italic">
+                {discount.comment ?? "-"}
+              </td>
+              <td className="p-4 text-center space-x-2">
+                <button
+                  onClick={() => handleEdit(discount.id)}
+                  className="inline-flex items-center px-2 py-1 text-sm text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded-md"
+                >
+                  <Pencil className="w-4 h-4 mr-1" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(discount.id)}
+                  className="inline-flex items-center px-2 py-1 text-sm text-red-700 bg-red-100 hover:bg-red-200 rounded-md"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
