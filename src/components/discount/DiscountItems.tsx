@@ -1,48 +1,80 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { dbFire } from "../../app/firebase/firebase";
+import {
+  collection,
+  getDocs,
+  Timestamp,
+  DocumentData,
+} from "firebase/firestore";
 import { Pencil, Trash2 } from "lucide-react";
+
+
+import DiscountEditForm from "./DiscountEditForm"
 
 interface DiscountItem {
   id: string;
   name: string;
-  percentage: string;
-  duration: string;
+  percentage: number;
+  durationFrom: Timestamp;
+  durationTo: Timestamp;
   comment?: string;
   image?: string;
-  minimumPurchase?: string;
+  minimumPurchase?: number;
 }
 
-const mockDiscounts: DiscountItem[] = [
-  {
-    id: "1",
-    name: "Summer Sale",
-    percentage: "25%",
-    duration: "2025-06-01 to 2025-06-30",
-    comment: "Applies to all products",
-    image: "https://via.placeholder.com/100",
-    minimumPurchase: "$50",
-  },
-  {
-    id: "2",
-    name: "Buy 1 Get 1",
-    percentage: "100%",
-    duration: "2025-07-01 to 2025-07-10",
-    comment: "Only on selected items",
-    image: "",
-    minimumPurchase: "$30",
-  },
-];
-
 export default function DiscountItems() {
+  const [discounts, setDiscounts] = useState<DiscountItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+
+
+  useEffect(() => {
+    const fetchDiscounts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(dbFire, "discount"));
+        const fetched: DiscountItem[] = [];
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data() as DocumentData;
+          fetched.push({
+            id: doc.id,
+            name: data.name,
+            percentage: data.percentage,
+            durationFrom: data.durationFrom,
+            durationTo: data.durationTo,
+            comment: data.comment,
+            image: data.image,
+            minimumPurchase: data.minimumPurchase,
+          });
+        });
+
+        setDiscounts(fetched);
+      } catch (error) {
+        console.error("Failed to fetch discounts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDiscounts();
+  }, []);
+
   const handleEdit = (id: string) => {
-    console.log("Edit discount:", id);
+    setSelectedId(id);
+    setShowEditForm(true);
   };
+
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this discount?")) {
       console.log("Deleted discount:", id);
     }
   };
+
+  if (loading) return <div>Loading discounts...</div>;
 
   return (
     <div className="mt-6 overflow-x-auto">
@@ -59,7 +91,7 @@ export default function DiscountItems() {
           </tr>
         </thead>
         <tbody className="text-sm divide-y divide-gray-100">
-          {mockDiscounts.map((discount) => (
+          {discounts.map((discount) => (
             <tr key={discount.id} className="hover:bg-gray-50 transition">
               <td className="p-4">
                 {discount.image ? (
@@ -75,9 +107,16 @@ export default function DiscountItems() {
                 )}
               </td>
               <td className="p-4 font-medium text-gray-800">{discount.name}</td>
-              <td className="p-4">{discount.percentage}</td>
-              <td className="p-4">{discount.duration}</td>
-              <td className="p-4">{discount.minimumPurchase ?? "-"}</td>
+              <td className="p-4">{discount.percentage}%</td>
+              <td className="p-4">
+                {discount.durationFrom?.toDate().toLocaleDateString()} -{" "}
+                {discount.durationTo?.toDate().toLocaleDateString()}
+              </td>
+              <td className="p-4">
+                {discount.minimumPurchase
+                  ? `Rp ${discount.minimumPurchase.toLocaleString()}`
+                  : "-"}
+              </td>
               <td className="p-4 text-gray-500 italic">
                 {discount.comment ?? "-"}
               </td>
@@ -101,6 +140,16 @@ export default function DiscountItems() {
           ))}
         </tbody>
       </table>
+      {showEditForm && selectedId && (
+        <DiscountEditForm
+          id={selectedId}
+          onClose={() => {
+            setShowEditForm(false);
+            setSelectedId(null);
+          }}
+        />
+      )}
+
     </div>
   );
 }

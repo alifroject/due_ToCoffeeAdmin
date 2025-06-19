@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { dbFire } from "../../app/firebase/firebase";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -20,8 +21,9 @@ export default function DiscountAddForm({ onClose }: Props) {
     comment: "",
     image: "",
     minimumPurchase: 0,
-
   });
+
+  const [uploading, setUploading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -36,14 +38,22 @@ export default function DiscountAddForm({ onClose }: Props) {
     });
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, image: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    setUploading(true);
+    const storage = getStorage();
+    const storageRef = ref(storage, `discount-images/${Date.now()}-${file.name}`);
+
+    try {
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      setFormData((prev) => ({ ...prev, image: downloadURL }));
+    } catch (error) {
+      console.error("Image upload error:", error);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -66,8 +76,7 @@ export default function DiscountAddForm({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-lg p-6 rounded-2xl shadow-xl relative animate-fadeIn">
-        {/* Close Button */}
+      <div className="bg-white w-full max-w-lg max-h-[90vh] p-6 rounded-2xl shadow-xl relative animate-fadeIn flex flex-col">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition"
@@ -78,150 +87,148 @@ export default function DiscountAddForm({ onClose }: Props) {
         <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
           Add New Discount
         </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Discount Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="e.g. Summer Sale"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Percentage */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Percentage (%)
-            </label>
-            <input
-              type="number"
-              name="percentage"
-              placeholder="e.g. 25"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Duration */}
-          <div className="grid grid-cols-2 gap-4">
+        <div className="overflow-y-auto flex-1 pr-1">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Duration From
+                Discount Name
               </label>
-              <DatePicker
-                selected={formData.durationFrom}
-                onChange={(date) =>
-                  date && setFormData((prev) => ({ ...prev, durationFrom: date }))
-                }
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Duration To
-              </label>
-              <DatePicker
-                selected={formData.durationTo}
-                onChange={(date) =>
-                  date && setFormData((prev) => ({ ...prev, durationTo: date }))
-                }
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Minimum Purchase */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Minimum Purchase
-            </label>
-            <input
-              type="number"
-              name="minimumPurchase"
-              placeholder="e.g. 50"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Image Upload */}
-          {/* Image Upload with Drag & Drop + Click */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Upload Banner/Image
-            </label>
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const file = e.dataTransfer.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setFormData((prev) => ({ ...prev, image: reader.result as string }));
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-              onClick={() => {
-                const input = document.getElementById("imageInput");
-                input?.click();
-              }}
-              className="w-full border-2 border-dashed border-blue-300 bg-blue-50 rounded-md cursor-pointer text-center p-6 hover:bg-blue-100 transition"
-            >
-              <p className="text-gray-600">Click or Drag & Drop to upload image</p>
               <input
-                id="imageInput"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
+                type="text"
+                name="name"
+                placeholder="e.g. Summer Sale"
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleChange}
+                required
               />
             </div>
 
-            {formData.image && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-600 mb-1">Preview:</p>
-                <img
-                  src={formData.image}
-                  alt="Uploaded"
-                  className="w-full h-auto max-h-64 object-contain rounded-md border"
+            {/* Percentage */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Percentage (%)
+              </label>
+              <input
+                type="number"
+                name="percentage"
+                placeholder="e.g. 25"
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Duration */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration From
+                </label>
+                <DatePicker
+                  selected={formData.durationFrom}
+                  onChange={(date) =>
+                    date && setFormData((prev) => ({ ...prev, durationFrom: date }))
+                  }
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-            )}
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration To
+                </label>
+                <DatePicker
+                  selected={formData.durationTo}
+                  onChange={(date) =>
+                    date && setFormData((prev) => ({ ...prev, durationTo: date }))
+                  }
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
 
+            {/* Minimum Purchase */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Minimum Purchase
+              </label>
+              <input
+                type="number"
+                name="minimumPurchase"
+                placeholder="e.g. 50"
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleChange}
+              />
+            </div>
 
-          {/* Comment / Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notes or Terms
-            </label>
-            <textarea
-              name="comment"
-              rows={3}
-              placeholder="Internal notes or public terms"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={handleChange}
-            />
-          </div>
+            {/* Image Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Upload Banner/Image
+              </label>
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={async (e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files[0];
+                  if (file) await handleImageUpload({ target: { files: [file] } } as any);
+                }}
+                onClick={() => {
+                  const input = document.getElementById("imageInput");
+                  input?.click();
+                }}
+                className="w-full border-2 border-dashed border-blue-300 bg-blue-50 rounded-md cursor-pointer text-center p-6 hover:bg-blue-100 transition"
+              >
+                <p className="text-gray-600">
+                  {uploading ? "Uploading..." : "Click or Drag & Drop to upload image"}
+                </p>
+                <input
+                  id="imageInput"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-medium transition"
-          >
-            Submit Discount
-          </button>
-        </form>
+              {formData.image && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 mb-1">Preview:</p>
+                  <div className="border rounded-md">
+                    <img
+                      src={formData.image}
+                      alt="Uploaded"
+                      className="w-full object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Comment / Notes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes or Terms
+              </label>
+              <textarea
+                name="comment"
+                rows={3}
+                placeholder="Internal notes or public terms"
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-medium transition"
+              disabled={uploading}
+            >
+              {uploading ? "Uploading image..." : "Submit Discount"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
