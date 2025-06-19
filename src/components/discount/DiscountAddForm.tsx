@@ -12,7 +12,10 @@ import "react-datepicker/dist/react-datepicker.css";
 interface Props {
   onClose: () => void;
 }
-
+interface ProductOption {
+  id: string;
+  name: string;
+}
 export default function DiscountAddForm({ onClose }: Props) {
   const [formData, setFormData] = useState({
     name: "",
@@ -29,16 +32,19 @@ export default function DiscountAddForm({ onClose }: Props) {
   const [discountType, setDiscountType] = useState("");
   const [selectedItem, setSelectedItem] = useState(""); // collection/category
   const [selectedProduct, setSelectedProduct] = useState(""); // specific product
-  const [productOptions, setProductOptions] = useState<string[]>([]);
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       if (!selectedItem) return;
 
       try {
-        const q = query(collection(dbFire, selectedItem)); // dynamic collection
+        const q = query(collection(dbFire, selectedItem));
         const snapshot = await getDocs(q);
-        const products = snapshot.docs.map((doc) => doc.data().name); // assuming `name` field
+        const products: ProductOption[] = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+        }));
         setProductOptions(products);
       } catch (error) {
         console.error("Failed to fetch products:", error);
@@ -47,6 +53,7 @@ export default function DiscountAddForm({ onClose }: Props) {
 
     fetchProducts();
   }, [selectedItem]);
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -83,11 +90,16 @@ export default function DiscountAddForm({ onClose }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const selectedProductName = productOptions.find(
+        (product) => product.id === selectedProduct
+      )?.name || "";
+
       await addDoc(collection(dbFire, "discount"), {
         ...formData,
         type: discountType,
         bogoItem: selectedItem,
-        bogoProduct: selectedProduct,
+        bogoProductId: selectedProduct,
+        bogoProduct: selectedProductName,
         duration: {
           from: formData.durationFrom,
           to: formData.durationTo,
@@ -99,6 +111,7 @@ export default function DiscountAddForm({ onClose }: Props) {
       console.error("Error adding discount:", error);
     }
   };
+
 
   return (
     <>
@@ -182,11 +195,12 @@ export default function DiscountAddForm({ onClose }: Props) {
                       >
                         <option value="">Choose Product</option>
                         {productOptions.map((product) => (
-                          <option key={product} value={product}>
-                            {product}
+                          <option key={product.id} value={product.id}>
+                            {product.name}
                           </option>
                         ))}
                       </select>
+
                     </div>
                   )}
                 </>
