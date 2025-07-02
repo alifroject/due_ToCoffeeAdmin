@@ -1,14 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 export default function Reports() {
+  const router = useRouter();
 
+  useEffect(() => {
+    router.replace("/dashboard/general-analytics");
+  }, [router]);
 
-    return (
-        <>
-            <div className="text-black">
-            <h1>this is dashboard</h1>
-
-            </div>
-        </>
-    )
+  return null; // 👈 don't render anything
 }

@@ -5,19 +5,29 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "../../lib/utils";
 import { signOut } from "firebase/auth";
 import { auth } from "../../app/firebase/firebase";
-
-// ✅ Import Lucide Icons
 import {
   Home,
   PackageOpen,
   ListOrdered,
-  History, Settings,
+  History,
+  Settings,
   LogOut,
-  DollarSign
+  DollarSign,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
+import { useState } from "react";
 
 const topNavItems = [
-  { label: "Dashboard", href: "/dashboard", icon: <Home className="w-5 h-5 text-white" /> },
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: <Home className="w-5 h-5 text-white" />,
+    subItems: [
+      { label: "Sales Analytics", href: "/dashboard/general-analytics" },
+      { label: "Inventory Analytics", href: "/dashboard/inventory-analytics" },
+    ],
+  },
   { label: "Products", href: "/product", icon: <PackageOpen className="w-5 h-5 text-white" /> },
   { label: "Order Queue", href: "/order-queue", icon: <ListOrdered className="w-5 h-5 text-white" /> },
   { label: "Transaction History", href: "/transaction-history", icon: <History className="w-5 h-5 text-white" /> },
@@ -33,6 +43,15 @@ const settingItem = {
 export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
+
+  const toggleDropdown = (label: string) => {
+    setOpenDropdowns((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -58,21 +77,51 @@ export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) 
         </h1>
 
         <nav className="flex flex-col space-y-2">
-          {topNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors flex items-center space-x-3",
-                pathname === item.href ? "bg-neutral-700 font-semibold" : "",
-                collapsed && "justify-center px-2 space-x-0"
-              )}
-              title={collapsed ? item.label : undefined}
-            >
-              <span>{item.icon}</span>
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          ))}
+          {topNavItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            const hasSubItems = item.subItems && item.subItems.length > 0;
+            const isOpen = openDropdowns[item.label];
+
+            return (
+              <div key={item.href} className="flex flex-col">
+                <button
+                  onClick={() => hasSubItems ? toggleDropdown(item.label) : router.push(item.href)}
+                  className={cn(
+                    "py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors flex items-center justify-between",
+                    isActive ? "bg-neutral-700 font-semibold" : "",
+                    collapsed ? "justify-center" : "space-x-3"
+                  )}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <div className={cn("flex items-center", collapsed && "justify-center w-full")}>
+                    <span>{item.icon}</span>
+                    {!collapsed && <span className="ml-3">{item.label}</span>}
+                  </div>
+                  {!collapsed && hasSubItems && (
+                    isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                  )}
+                </button>
+
+                {/* Subitems */}
+                {hasSubItems && isOpen && !collapsed && (
+                  <div className="ml-8 mt-1 flex flex-col space-y-1">
+                    {item.subItems.map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        className={cn(
+                          "text-sm text-gray-300 hover:text-white py-1 px-2 rounded hover:bg-neutral-800 transition-colors",
+                          pathname === sub.href ? "bg-neutral-700 text-white font-semibold" : ""
+                        )}
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
       </div>
 
