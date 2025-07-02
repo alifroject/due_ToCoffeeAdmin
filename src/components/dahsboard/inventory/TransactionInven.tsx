@@ -100,7 +100,7 @@ export default function TransactionInv() {
         }));
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex items-center justify-center">
             <div className="w-full m-5 md:m-14 max-w-6xl h-[510px] mx-auto p-5 bg-white  rounded-xl shadow-[0_2px_12px_rgba(234,179,8,0.3)] text-sm">
 
 

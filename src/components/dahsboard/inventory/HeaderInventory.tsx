@@ -57,7 +57,7 @@ export default function HeaderStats() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center bg-blue-100 p-6 rounded-xl shadow font-sans">
+    <div className="grid grid-cols-1  sm:grid-cols-3 gap-4 text-center p-6 rounded-xl  font-sans">
       {/* Product Types */}
       <div className="bg-white p-6 rounded-xl shadow-md flex flex-col items-center space-y-2">
         <ShoppingBasket size={36} className="text-blue-500" />

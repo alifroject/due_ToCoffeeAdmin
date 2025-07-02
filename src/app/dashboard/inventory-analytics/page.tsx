@@ -5,7 +5,7 @@ export default function Inventory() {
 
     return (
         <>
-            <div className="w-full max-w-full  overflow-x-hidden">
+            <div>
            <InventoryMain/>
             </div>
         </>
