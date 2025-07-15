@@ -61,7 +61,7 @@ export default function HeaderStats() {
       {/* Product Types */}
       <div className="bg-white p-6 rounded-xl shadow-md flex flex-col items-center space-y-2">
         <ShoppingBasket size={36} className="text-blue-500" />
-        <h2 className="text-2xl font-bold tracking-wide text-gray-800">4 Product Types</h2>
+        <h2 className="text-2xl font-bold tracking-wide text-gray-800">4 Product Types you can see</h2>
         <p className="text-sm text-gray-500">Pastries, Coffees, Foods, Drinks</p>
       </div>
 
