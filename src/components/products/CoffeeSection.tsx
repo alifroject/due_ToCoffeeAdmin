@@ -59,7 +59,7 @@ export default function CoffeeList() {
   );
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-b from-[#f7f3ef] via-[#fefaf7] to-[#f5f0eb] font-sans text-[#3b2f2f]">
+    <div className="p-6 min-h-screen flex flex-col bg-gradient-to-b from-[#f7f3ef] via-[#fefaf7] to-[#f5f0eb] font-sans text-[#3b2f2f]">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-light tracking-wide text-[#4b2e2e]">☕ Coffee Collection</h2>
         <button
@@ -70,7 +70,7 @@ export default function CoffeeList() {
         </button>
       </div>
 
-      {/* 🔍 Input filter nama kopi */}
+      {/* Search input */}
       <div className="mb-6">
         <input
           type="text"
@@ -90,11 +90,11 @@ export default function CoffeeList() {
         <p className="text-center text-[#9e8a7a] italic">No coffee available</p>
       ) : (
         <>
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 relative z-10">
             {paginatedCoffees.map((coffee) => (
               <div
                 key={coffee.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 flex flex-col overflow-hidden border border-[#eeeae6]"
+                className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 flex flex-col border border-[#eeeae6] relative min-h-[420px]"
               >
                 {coffee.imageUrl && (
                   <Image
@@ -112,26 +112,28 @@ export default function CoffeeList() {
                       Rp {Number(coffee.price).toLocaleString()}
                     </p>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => router.push(`/product/modify-coffee/${coffee.id}`)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-sm shadow-sm hover:shadow transition"
-                    >
-                      Modify
-                    </button>
-                    <button
-                      onClick={() => handleDelete(coffee.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm shadow-sm hover:shadow transition"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                </div>
+
+                {/* Modify and Delete buttons BELOW the card */}
+                <div className="px-4 pb-4 flex justify-between space-x-2">
+                  <button
+                    onClick={() => router.push(`/product/modify-coffee/${coffee.id}`)}
+                    className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 text-sm rounded-lg font-medium transition"
+                  >
+                    ✏️ Modify
+                  </button>
+                  <button
+                    onClick={() => handleDelete(coffee.id)}
+                    className="w-full bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 text-sm rounded-lg font-medium transition"
+                  >
+                    🗑️ Delete
+                  </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Pagination dots */}
+          {/* Pagination Dots */}
           <div className="flex justify-center mt-8">
             {Array.from({ length: totalPages }, (_, index) => (
               <button
@@ -145,6 +147,7 @@ export default function CoffeeList() {
         </>
       )}
     </div>
+
 
   );
 }
