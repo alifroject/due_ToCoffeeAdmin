@@ -10,6 +10,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import "./globals.css";
 import AdminDropdown from "@/components/account/AdminDropdown";
 import Head from 'next/head';
+import { Inter } from 'next/font/google'
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const [showSidebar, setShowSidebar] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -74,22 +76,42 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             <main className="flex-1 bg-blue-50 overflow-y-auto relative">
               {/* HEADER */}
-              <div className="w-full flex items-center justify-between px-6 py-4 shadow bg-blue-200 sticky top-0 z-40">
+              <div className="w-full flex items-center justify-between px-6 py-4 shadow-md sticky top-0 z-40 backdrop-blur-md bg-gradient-to-r from-blue-100 via-sky-200 to-blue-100 border-b border-blue-300/30 transition-all duration-300 font-sans">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setShowSidebar(prev => !prev)} className="text-black focus:outline-none">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  <button
+                    onClick={() => setShowSidebar((prev) => !prev)}
+                    className="text-sky-700 hover:text-sky-900 focus:outline-none transition-transform duration-200 hover:scale-110"
+                    title="Toggle Sidebar"
+                  >
+                    <svg
+                      className="w-7 h-7 md:w-6 md:h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
                     </svg>
                   </button>
+
                   {!showSidebar ? (
-                    <span className="font-semibold text-gray-700 hidden md:inline">admin due to coffee</span>
+                    <span className="hidden md:inline text-base md:text-lg font-medium text-gray-700 tracking-wider italic transition-all duration-300">
+                      admin due to coffee <span className="animate-pulse">☕</span>
+                    </span>
                   ) : (
-                    <span className="hidden md:inline text-black text-xl">admin due to coffee</span>
+                    <span className="hidden md:inline text-xl font-extrabold text-sky-800 tracking-wider transition-all duration-300">
+                      admin due to coffee <span className="animate-pulse">☕</span>
+                    </span>
                   )}
                 </div>
 
                 <AdminDropdown />
               </div>
+
 
               <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
                 <button
@@ -101,7 +123,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
 
               {children}
-             
+
 
             </main>
 

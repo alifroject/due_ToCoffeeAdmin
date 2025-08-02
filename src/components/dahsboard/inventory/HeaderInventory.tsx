@@ -57,27 +57,28 @@ export default function HeaderStats() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1  sm:grid-cols-3 gap-4 text-center p-6 rounded-xl  font-sans">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center p-6 rounded-xl font-sans">
       {/* Product Types */}
-      <div className="bg-white p-6 rounded-xl shadow-md flex flex-col items-center space-y-2">
-        <ShoppingBasket size={36} className="text-blue-500" />
-        <h2 className="text-2xl font-bold tracking-wide text-gray-800">4 Product Types you can see</h2>
-        <p className="text-sm text-gray-500">Pastries, Coffees, Foods, Drinks</p>
+      <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center space-y-2">
+        <ShoppingBasket size={36} className="text-blue-400 hover:text-blue-600 transition-colors duration-200" />
+        <h2 className="text-xl font-medium tracking-tight text-gray-700">4 Product Types you can see</h2>
+        <p className="text-sm text-gray-500 italic">Pastries, Coffees, Foods, Drinks</p>
       </div>
 
       {/* Available */}
-      <div className="bg-white p-6 rounded-xl shadow-md flex flex-col items-center space-y-2">
-        <CheckCircle size={36} className="text-green-500" />
-        <h2 className="text-2xl font-bold tracking-wide text-gray-800">{availableCount} Available</h2>
-        <p className="text-sm text-green-600">Items in stock</p>
+      <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center space-y-2">
+        <CheckCircle size={36} className="text-green-400 hover:text-green-600 transition-colors duration-200" />
+        <h2 className="text-xl font-medium tracking-tight text-gray-700">{availableCount} Available</h2>
+        <p className="text-sm text-green-600 italic">Items in stock</p>
       </div>
 
       {/* Unavailable */}
-      <div className="bg-white p-6 rounded-xl shadow-md flex flex-col items-center space-y-2">
-        <Ban size={36} className="text-red-500" />
-        <h2 className="text-2xl font-bold tracking-wide text-gray-800">{unavailableCount} Unavailable</h2>
-        <p className="text-sm text-red-600">Out of stock</p>
+      <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center space-y-2">
+        <Ban size={36} className="text-red-400 hover:text-red-600 transition-colors duration-200" />
+        <h2 className="text-xl font-medium tracking-tight text-gray-700">{unavailableCount} Unavailable</h2>
+        <p className="text-sm text-red-600 italic">Out of stock</p>
       </div>
     </div>
+
   );
 }
