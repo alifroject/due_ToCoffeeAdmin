@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {
     collection,
     getDocs,
-    DocumentData,
 } from "firebase/firestore";
 import { dbFire } from "../../../app/firebase/firebase";
 
@@ -18,13 +17,13 @@ interface Product {
 
 export default function LastAnalyticsPage() {
     const [rareProducts, setRareProducts] = useState<Product[]>([]);
+    const [feedbacks, setFeedbacks] = useState<{ userName: string; feedbackText: string }[]>([]);
 
     useEffect(() => {
-        const fetchRareProducts = async () => {
+        const fetchRareProductsAndFeedbacks = async () => {
             const categoryCollections = ["coffees", "pastries", "foods", "drinks"];
             const productMap: Record<string, Product> = {};
 
-            // Step 1: Load all products from each category
             for (const category of categoryCollections) {
                 const snapshot = await getDocs(collection(dbFire, category));
                 snapshot.forEach((doc) => {
@@ -33,13 +32,12 @@ export default function LastAnalyticsPage() {
                         name: data.name,
                         imageUrl: data.imageUrl,
                         productId: doc.id,
-                        quantity: 0, // initial
+                        quantity: 0,
                         category,
                     };
                 });
             }
 
-            // Step 2: Load transaction data and count purchases
             const transactionsSnapshot = await getDocs(collection(dbFire, "transactions"));
             transactionsSnapshot.forEach((doc) => {
                 const items: { productId: string; quantity: number }[] = doc.data().items || [];
@@ -50,37 +48,28 @@ export default function LastAnalyticsPage() {
                 });
             });
 
-            // Step 3: Sort by lowest quantity and pick 4 random from the bottom
             const allProducts = Object.values(productMap);
             allProducts.sort((a, b) => a.quantity - b.quantity);
-
-            const fewSold = allProducts.slice(0, 10); // bottom 10
+            const fewSold = allProducts.slice(0, 10);
             const randomFour = fewSold.sort(() => 0.5 - Math.random()).slice(0, 4);
 
             setRareProducts(randomFour);
+
+            // FETCH FEEDBACKS FROM FIRESTORE
+            const feedbackSnapshot = await getDocs(collection(dbFire, "feedback"));
+            const feedbackList: { userName: string; feedbackText: string }[] = [];
+            feedbackSnapshot.forEach((doc) => {
+                const data = doc.data();
+                feedbackList.push({
+                    userName: data.userName,
+                    feedbackText: data.feedbackText,
+                });
+            });
+            setFeedbacks(feedbackList);
         };
 
-        fetchRareProducts();
+        fetchRareProductsAndFeedbacks();
     }, []);
-
-    const feedbacks = [
-        {
-            user: "Anna W.",
-            message: "Love the pastries! Would like more drink combos.",
-        },
-        {
-            user: "John D.",
-            message: "The coffee is great, but app performance could be better.",
-        },
-        {
-            user: "Sarah M.",
-            message: "More vegetarian food options would be amazing!",
-        },
-        {
-            user: "Alex T.",
-            message: "Smooth checkout, fast delivery. Keep it up!",
-        },
-    ];
 
     return (
         <div className="p-6">
@@ -120,14 +109,12 @@ export default function LastAnalyticsPage() {
                                     alt={product.name}
                                     className="w-20 h-20 mx-auto rounded-full object-cover border border-gray-300"
                                 />
-                                <p className="mt-2 text-sm font-medium  text-white">{product.name}</p>
-                                <p className="text-[11px]  text-white">Sold: {product.quantity}</p>
+                                <p className="mt-2 text-sm font-medium text-white">{product.name}</p>
+                                <p className="text-[11px] text-white">Sold: {product.quantity}</p>
                             </div>
                         ))}
-
                     </div>
                 </div>
-
 
                 {/* FEEDBACK RIGHT BOX */}
                 <div className="bg-white rounded-xl p-6 shadow-md border">
@@ -137,8 +124,8 @@ export default function LastAnalyticsPage() {
                     <div className="space-y-4">
                         {feedbacks.map((f, idx) => (
                             <div key={idx} className="bg-gray-50 p-3 rounded-lg shadow-sm border">
-                                <p className="text-sm text-gray-800 font-semibold mb-1">{f.user}</p>
-                                <p className="text-sm text-gray-600 italic">"{f.message}"</p>
+                                <p className="text-sm text-gray-800 font-semibold mb-1">{f.userName}</p>
+                                <p className="text-sm text-gray-600 italic">"{f.feedbackText}"</p>
                             </div>
                         ))}
                     </div>

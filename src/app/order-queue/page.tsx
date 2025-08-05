@@ -264,7 +264,7 @@ export default function QueuePage() {
 
                     <td className="px-6 py-4 text-right text-green-600 font-semibold">
                       {typeof tx.amount === "number"
-                        ? `Rp${tx.amount.toLocaleString("id-ID")}`
+                        ? `Rp ${tx.amount.toLocaleString("id-ID")}`
                         : "Rp0"}
                     </td>
 

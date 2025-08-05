@@ -77,11 +77,11 @@ export default function OrderHistoryContent({
 
     return (
         <section className="p-6 mx-auto">
-            <div className="bg-white border border-blue-200 rounded-xl p-6 shadow-md space-y-6">
-                <div className="relative bg-white border border-blue-200 rounded-xl p-6 shadow-md space-y-6">
-                    {/* Export button on top-right corner */}
+            <div className="bg-white border border-blue-100 rounded-2xl p-8 shadow-xl space-y-8 font-sans text-gray-800">
+                <div className="relative bg-white border border-blue-100 rounded-2xl p-6 shadow-lg space-y-4">
+                    {/* Export button top-right */}
                     <button
-                        className="absolute top-4 right-4 flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                        className="absolute top-5 right-5 flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded"
                         onClick={() =>
                             exportTransactionsToCSV(
                                 transactions,
@@ -90,32 +90,41 @@ export default function OrderHistoryContent({
                                 selectedStatus
                             )
                         }
+                        aria-label="Export transactions to CSV"
                     >
-                        <span className="text-sm font-semibold">Export</span>
+                        <span className="text-sm font-semibold tracking-wide" style={{ fontVariant: 'small-caps' }}>
+                            Export
+                        </span>
                         <svg
-                            className="w-4 h-4"
+                            className="w-5 h-5"
                             fill="none"
                             stroke="currentColor"
                             strokeWidth={2}
                             viewBox="0 0 24 24"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
                         >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
+                            <path d="M7 17L17 7M7 7h10v10" />
                         </svg>
                     </button>
 
-
-                    {/* Title centered in content */}
-                    <h1 className="text-3xl font-bold">📦 Transaction History</h1>
+                    {/* Title */}
+                    <h1 className="text-2xl md:text-3xl font-semibold text-blue-900 tracking-wide select-none" style={{ fontVariant: 'small-caps' }}>
+                        📦 Transaction History
+                    </h1>
                 </div>
 
-                {/* Row 2: Filter controls */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* From Date Picker */}
+                {/* Filters */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {/* From Date */}
                     <div>
-                        <label className="block mb-2 font-semibold text-gray-700">From Date</label>
+                        <label className="block mb-2 text-gray-700 font-medium tracking-wide">
+                            From Date
+                        </label>
                         <DatePicker
                             selected={fromDateObj}
-                            onChange={(date: Date | null) => {
+                            onChange={(date) => {
                                 if (date) {
                                     setFromYear(date.getFullYear().toString());
                                     setFromMonth((date.getMonth() + 1).toString().padStart(2, "0"));
@@ -128,12 +137,14 @@ export default function OrderHistoryContent({
                         />
                     </div>
 
-                    {/* To Date Picker */}
+                    {/* To Date */}
                     <div>
-                        <label className="block mb-2 font-semibold text-gray-700">To Date</label>
+                        <label className="block mb-2 text-gray-700 font-medium tracking-wide">
+                            To Date
+                        </label>
                         <DatePicker
                             selected={toDateObj}
-                            onChange={(date: Date | null) => {
+                            onChange={(date) => {
                                 if (date) {
                                     setToYear(date.getFullYear().toString());
                                     setToMonth((date.getMonth() + 1).toString().padStart(2, "0"));
@@ -148,11 +159,13 @@ export default function OrderHistoryContent({
 
                     {/* Queue Number Status */}
                     <div>
-                        <label className="block mb-2 font-semibold text-gray-700">Queue Number Status</label>
+                        <label className="block mb-2 text-gray-700 font-medium tracking-wide">
+                            Queue Number Status
+                        </label>
                         <select
                             value={selectedStatus}
                             onChange={(e) => setSelectedStatus(e.target.value)}
-                            className="w-full bg-white text-gray-800 font-medium border border-blue-300 rounded-xl px-4 py-2 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
+                            className="w-full bg-white text-gray-900 font-semibold border border-blue-200 rounded-xl px-5 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 tracking-wide"
                         >
                             <option value="">All</option>
                             <option value="expired">Expired</option>
@@ -163,24 +176,25 @@ export default function OrderHistoryContent({
                 </div>
             </div>
 
-
             {loading ? (
                 <p className="mt-4 text-blue-600 font-semibold">Loading...</p>
             ) : (
-                <div className="overflow-x-auto mt-4">
-                    <table className="min-w-full divide-y divide-blue-200 border border-blue-200 rounded-xl bg-white shadow">
-                        <thead className="bg-blue-100">
+                <div className="overflow-x-auto mt-6 rounded-lg shadow-lg border border-gray-300 bg-white">
+                    <table className="min-w-full divide-y divide-gray-200 font-sans text-gray-700">
+                        <thead className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-300">
                             <tr>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-blue-800">Order ID</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-blue-800">Amount</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-blue-800">Payment Status</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-blue-800">Order Status</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-blue-800">Created At</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-blue-800">Customer</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-blue-800">View</th>
+                                {["Order ID", "Amount", "Payment Status", "Order Status", "Created At", "Customer", "View"].map((title) => (
+                                    <th
+                                        key={title}
+                                        className="px-5 py-3 text-left text-xs font-medium tracking-wide text-blue-900 uppercase select-none"
+                                        style={{ fontVariant: 'small-caps' }}
+                                    >
+                                        {title}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-blue-100">
+                        <tbody className="divide-y divide-gray-100">
                             {transactions
                                 .filter((transaction) => {
                                     const transactionDate = transaction.created_at.toDate();
@@ -200,27 +214,40 @@ export default function OrderHistoryContent({
                                 .map((transaction) => {
                                     const transactionDate = transaction.created_at.toDate();
                                     return (
-                                        <tr key={transaction.order_id} className="hover:bg-blue-50 transition">
-                                            <td className="px-4 py-2 text-sm font-medium text-blue-900">{transaction.order_id}</td>
-                                            <td className="px-4 py-2 text-sm text-blue-800">Rp {transaction.amount.toLocaleString("id-ID")}</td>
-                                            <td className="px-4 py-2 text-sm text-blue-800">{transaction.status}</td>
-                                            <td className="px-4 py-2 text-sm text-blue-800">{transaction.queue_number_status}</td>
-                                            <td className="px-4 py-2 text-sm text-blue-800">
+                                        <tr
+                                            key={transaction.order_id}
+                                            className="hover:bg-blue-50 transition-colors duration-300 cursor-pointer"
+                                            style={{ fontFeatureSettings: '"liga", "clig", "calt"' }}
+                                        >
+                                            <td className="px-5 py-3 text-sm font-semibold text-blue-900 tracking-tight whitespace-nowrap">
+                                                {transaction.order_id}
+                                            </td>
+                                            <td className="px-5 py-3 text-sm text-blue-700 tracking-tight">
+                                                Rp&nbsp;{transaction.amount.toLocaleString("id-ID")}
+                                            </td>
+
+                                            <td className="px-5 py-3 text-sm text-blue-700 tracking-tight capitalize">
+                                                {transaction.status}
+                                            </td>
+                                            <td className="px-5 py-3 text-sm text-blue-700 tracking-tight capitalize">
+                                                {transaction.queue_number_status}
+                                            </td>
+                                            <td className="px-5 py-3 text-sm text-blue-700 tracking-tight font-mono">
                                                 {transactionDate.toLocaleString("id-ID", {
                                                     dateStyle: "full",
                                                     timeStyle: "short",
                                                 })}
                                             </td>
-                                            <td className="px-4 py-2 text-sm text-blue-800">
-                                                {transaction.userName} ({transaction.userEmail})
+                                            <td className="px-5 py-3 text-sm text-blue-700 tracking-tight font-serif">
+                                                {transaction.userName} <span className="text-gray-400">({transaction.userEmail})</span>
                                             </td>
-                                            <td>
+                                            <td className="px-5 py-3 text-sm">
                                                 <Link
                                                     href={`/transaction-history/${transaction.order_id}`}
-                                                    className="text-red-600"
+                                                    className="text-red-600 font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-red-300 rounded"
+                                                    tabIndex={0}
                                                 >
                                                     View
-
                                                 </Link>
                                             </td>
                                         </tr>
@@ -229,6 +256,7 @@ export default function OrderHistoryContent({
                         </tbody>
                     </table>
                 </div>
+
 
             )}
         </section>
