@@ -16,7 +16,7 @@ export default function DiscountHeader({ filter, setFilter }: DiscountHeaderProp
     <>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white rounded-2xl shadow-md p-6 border border-gray-100 font-sans">
         <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 tracking-wide select-none" style={{ fontVariant: 'small-caps' }}>
-          🎉 Discount Manager
+          🎉 Discount Management
         </h1>
 
         <div className="flex items-center gap-4">

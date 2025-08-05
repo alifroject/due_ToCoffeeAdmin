@@ -223,8 +223,9 @@ export default function OrderHistoryContent({
                                                 {transaction.order_id}
                                             </td>
                                             <td className="px-5 py-3 text-sm text-blue-700 tracking-tight">
-                                                Rp {transaction.amount.toLocaleString("id-ID")}
+                                                Rp&nbsp;{transaction.amount.toLocaleString("id-ID")}
                                             </td>
+
                                             <td className="px-5 py-3 text-sm text-blue-700 tracking-tight capitalize">
                                                 {transaction.status}
                                             </td>
