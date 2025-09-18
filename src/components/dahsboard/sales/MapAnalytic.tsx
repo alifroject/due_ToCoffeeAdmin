@@ -60,10 +60,10 @@ export default function TransactionMapPage() {
           scrollWheelZoom={true}
           className="w-full h-full z-0"
         >
-          {/* Peta gaya dark */}
+          {/* 🌍 Gratis dan tanpa autentikasi */}
           <TileLayer
-            url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; OpenMapTiles &copy; OpenStreetMap contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
 
           {/* Marker Cafe */}
