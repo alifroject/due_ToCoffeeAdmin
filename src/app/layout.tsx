@@ -70,9 +70,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {user && (
           <div className="md:flex min-h-screen">
-            <div className="hidden md:block">
+            <div className="hidden md:block w-full md:w-auto">
               <Sidebar collapsed={showSidebar} />
             </div>
+
 
             <main className="flex-1 bg-blue-50 overflow-y-auto relative">
               {/* HEADER */}
@@ -129,18 +130,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 
             {showDrawer && (
-              <div className="fixed inset-0 bg-black/40 z-50 md:hidden flex items-end">
-                <div className="bg-[#0f0f0f] text-white w-full max-h-[90%] p-4 rounded-t-2xl shadow-lg overflow-y-auto relative">
+              <div className="fixed inset-0 bg-black/40 z-50 md:hidden flex">
+                <div className="bg-[#0f0f0f] text-white w-full h-full p-4 overflow-y-auto relative">
                   <button
                     className="absolute right-4 top-4 text-white text-xl font-bold"
                     onClick={() => setShowDrawer(false)}
                   >
                     ✕
                   </button>
-                  <Sidebar />
+
+                  {/* Pass the close handler here 👇 */}
+                  <Sidebar onClose={() => setShowDrawer(false)} />
                 </div>
               </div>
             )}
+
+
           </div>
         )}
       </body>

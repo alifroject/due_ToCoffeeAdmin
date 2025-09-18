@@ -11,7 +11,6 @@ import {
   ListOrdered,
   History,
   Settings,
-  LogOut,
   DollarSign,
   ChevronDown,
   ChevronUp,
@@ -56,7 +55,13 @@ const settingItem = {
   icon: <Settings className="w-5 h-5" />,
 };
 
-export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
+export default function Sidebar({
+  collapsed = false,
+  onClose, // 👈 new optional prop
+}: {
+  collapsed?: boolean;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
@@ -68,9 +73,15 @@ export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) 
     }));
   };
 
+  const handleItemClick = (href: string) => {
+    router.push(href);
+    if (onClose) onClose(); // 👈 close sidebar after navigation
+  };
+
   const handleLogout = async () => {
     await signOut(auth);
     router.push("/");
+    if (onClose) onClose(); // 👈 close sidebar after logout
   };
 
   return (
@@ -78,7 +89,7 @@ export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) 
       className={cn(
         "min-h-screen text-white p-4 flex flex-col justify-between transition-all duration-300 shadow-xl border-r border-white/10 backdrop-blur-md",
         "bg-gradient-to-b from-neutral-900 via-black to-neutral-900/90",
-        collapsed ? "w-20" : "w-64"
+        collapsed ? "w-20 md:w-20" : "w-[90%] md:w-64"
       )}
     >
       {/* Top section */}
@@ -102,7 +113,7 @@ export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) 
               <div key={item.href} className="flex flex-col">
                 <button
                   onClick={() =>
-                    hasSubItems ? toggleDropdown(item.label) : router.push(item.href)
+                    hasSubItems ? toggleDropdown(item.label) : handleItemClick(item.href)
                   }
                   className={cn(
                     "py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-between group",
@@ -131,6 +142,9 @@ export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) 
                       <Link
                         key={sub.href}
                         href={sub.href}
+                        onClick={() => {
+                          if (onClose) onClose(); // 👈 close drawer when sub-item clicked
+                        }}
                         className={cn(
                           "text-sm text-gray-300 hover:text-white py-1 px-2 rounded-lg hover:bg-white/10 transition-all duration-200",
                           pathname === sub.href ? "bg-neutral-700 text-white font-semibold" : ""
@@ -138,6 +152,7 @@ export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) 
                       >
                         {sub.label}
                       </Link>
+
                     ))}
                   </div>
                 )}
@@ -146,10 +161,6 @@ export default function Sidebar({ collapsed = false }: { collapsed?: boolean }) 
           })}
         </nav>
       </div>
-
-    
-
-     
     </aside>
   );
 }
