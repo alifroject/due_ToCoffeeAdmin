@@ -2,107 +2,100 @@
 
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
-import { useEffect, useState } from "react";
-import { dbFire } from "../../../app/firebase/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { useState } from "react";
 
-// 🔵 Café Icon (blue)
+// ☕ Cafe Icon (pusat lokasi)
 const cafeIcon = new Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/924/924514.png", // Ikon kopi
+  iconSize: [38, 38],
+  iconAnchor: [19, 38],
 });
 
-// 🔴 User Icon (red)
+// 🔴 User Icon (beberapa titik di sekitar cafe)
 const userIcon = new Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-  iconSize: [20, 20],
-  iconAnchor: [10, 20],
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149071.png", // Ikon user merah
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
 });
 
-// Manual Depok café
-const cafeLocations = [
-  {
-    name: "Cafe Depok 1",
-    latitude: -6.4025,
-    longitude: 106.7942,
-  },
-];
-
-type Transaction = {
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  type?: string;
+// Lokasi cafe utama
+const cafeLocation = {
+  name: "Cafe Margonda",
+  latitude: -6.35473386320184,
+  longitude: 106.84160985275757,
 };
 
+// Fungsi untuk menghasilkan lokasi acak di sekitar pusat (±100 meter)
+function generateNearbyLocations(centerLat: number, centerLng: number, count: number) {
+  const locations = [];
+  const meterOffset = 0.0009; // ~100 meter
+  for (let i = 0; i < count; i++) {
+    const randomLat = centerLat + (Math.random() - 0.5) * meterOffset;
+    const randomLng = centerLng + (Math.random() - 0.5) * meterOffset;
+    locations.push({ latitude: randomLat, longitude: randomLng });
+  }
+  return locations;
+}
+
+// Titik user di sekitar cafe (±100m)
+const fakeUserLocations = generateNearbyLocations(
+  cafeLocation.latitude,
+  cafeLocation.longitude,
+  6 // jumlah user
+);
+
 export default function TransactionMapPage() {
-  const [userLocations, setUserLocations] = useState<Transaction[]>([]);
-
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      const snap = await getDocs(collection(dbFire, "transactions"));
-      const data = snap.docs.map((doc) => doc.data() as Transaction);
-      const valid = data.filter(
-        (tx) => tx.location?.latitude && tx.location?.longitude
-      );
-      setUserLocations(valid);
-    };
-
-    fetchTransactions();
-  }, []);
+  const [userLocations] = useState(fakeUserLocations);
 
   return (
     <div className="p-6 text-black dark:text-white">
-      <h2 className="text-2xl text-black font-bold mb-4">Transaction Location Map</h2>
+      <h2 className="text-2xl text-black font-bold mb-4">
+        Transaction Location Map
+      </h2>
 
       <div className="rounded-xl overflow-hidden border dark:border-neutral-700 shadow-lg h-[500px]">
         <MapContainer
-          center={[-2.5489, 118.0149]} // Center of Indonesia
-          zoom={5.5}
+          center={[cafeLocation.latitude, cafeLocation.longitude]} // Fokus ke pusat cafe
+          zoom={20} // Dekat banget
           scrollWheelZoom={true}
           className="w-full h-full z-0"
         >
-          {/* Minimal / grayscale tile */}
+          {/* Peta gaya dark */}
           <TileLayer
             url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; OpenMapTiles &copy; OpenStreetMap contributors'
           />
 
-          {/* Static Café Markers (Blue) */}
-          {cafeLocations.map((cafe, idx) => (
-            <Marker
-              key={`cafe-${idx}`}
-              position={[cafe.latitude, cafe.longitude]}
-              icon={cafeIcon}
-            >
-              <Popup>
-                <div>
-                  <strong>{cafe.name}</strong>
-                  <br />
-                  Lat: {cafe.latitude}
-                  <br />
-                  Lng: {cafe.longitude}
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+          {/* Marker Cafe */}
+          <Marker
+            position={[cafeLocation.latitude, cafeLocation.longitude]}
+            icon={cafeIcon}
+          >
+            <Popup>
+              <div>
+                <strong>{cafeLocation.name}</strong>
+                <br />
+                Lat: {cafeLocation.latitude.toFixed(6)}
+                <br />
+                Lng: {cafeLocation.longitude.toFixed(6)}
+              </div>
+            </Popup>
+          </Marker>
 
-          {/* User Location Markers from Firestore (Red) */}
-          {userLocations.map((tx, idx) => (
+          {/* Marker User di radius ±100m */}
+          {userLocations.map((user, idx) => (
             <Marker
               key={`user-${idx}`}
-              position={[tx.location.latitude, tx.location.longitude]}
+              position={[user.latitude, user.longitude]}
               icon={userIcon}
             >
               <Popup>
                 <div>
-                  <strong>User Transaction</strong>
+                  <strong>User {idx + 1}</strong>
                   <br />
-                  Lat: {tx.location.latitude.toFixed(4)}
+                  Lat: {user.latitude.toFixed(6)}
                   <br />
-                  Lng: {tx.location.longitude.toFixed(4)}
+                  Lng: {user.longitude.toFixed(6)}
                 </div>
               </Popup>
             </Marker>
